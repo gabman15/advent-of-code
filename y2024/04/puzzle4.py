@@ -72,6 +72,18 @@ def find_word(word_search, i, j, word, direction):
                 return find_word(word_search, i+1, j+1, word[1:], direction)
     return False
 
+def find_mas(word_search, i, j):
+    if (check_letter(word_search, i, j, "A")):
+        if (check_bounds(word_search, i, j, DOWNRIGHT) and
+            check_bounds(word_search, i, j, UPLEFT) and
+            check_bounds(word_search, i, j, DOWNLEFT) and
+            check_bounds(word_search, i, j, UPRIGHT)):
+            return ((find_word(word_search, i-1, j-1, "MAS", DOWNRIGHT) or
+                     find_word(word_search, i+1, j+1, "MAS", UPLEFT)) and
+                    (find_word(word_search, i-1, j+1, "MAS", DOWNLEFT) or
+                     find_word(word_search, i+1, j-1, "MAS", UPRIGHT)))
+    return False
+
 def look_for_words(word_search, word):
     num = 0
     for i in range(len(word_search)):
@@ -94,6 +106,14 @@ def look_for_words(word_search, word):
                 num+=1
     return num
 
+def look_for_mas(word_search):
+    num = 0
+    for i in range(len(word_search)):
+        for j in range(len(word_search[0])):
+            if (find_mas(word_search, i, j)):
+                num+=1
+    return num        
+
 def solution(word_search):
     word_search = split_word_search(word_search)
     # print(word_search[4])
@@ -101,7 +121,7 @@ def solution(word_search):
     # print(find_word(word_search, 4, 0, "XMAS", DOWN))
     # print(find_word(word_search, 4, 0, "XMAS", LEFT))
     # print(find_word(word_search, 4, 0, "XMAS", RIGHT))
-    return look_for_words(word_search, "XMAS")
+    return look_for_mas(word_search)
     
 def read_input():
     word_search = list()
