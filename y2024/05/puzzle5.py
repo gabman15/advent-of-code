@@ -46,6 +46,100 @@ def verify_updates(updates, rules):
             valid_updates.append(update)
     return valid_updates
 
+def get_incorrect_updates(updates, rules):
+    incorrect_updates = list()
+    for update in updates:
+        if (not verify_update(update, rules)):
+            incorrect_updates.append(update)
+    return incorrect_updates
+
+def get_applicable_rules(update, rules):
+    a_rules = list()
+    for rule in rules:
+        try:
+            idx1 = update.index(rule[0])
+            idx2 = update.index(rule[1])
+            a_rules.append(rule)
+        except:
+            pass
+    return a_rules
+
+def get_applicable_rules_page(update, rules, page):
+    a_rules = get_applicable_rules(update, rules)
+    for rule in a_rules:
+        if (rule[0] != page and rule[1] != page):
+            a_rules.remove(rule)
+    return a_rules
+
+def get_relevant_pages(rules):
+    pages = set()
+    for rule in rules:
+        pages.add(rule[0])
+        pages.add(rule[1])
+    return pages
+
+def fix_update_rule(update, rule):
+    if (verify_update_rule(update, rule)):
+        return update
+    print(f"applying rule: {rule} on {update}")
+    update.remove(rule[0])
+    update.insert(update.index(rule[1]), rule[0])
+    return update
+
+def get_right_rules(rules, page):
+    right_rules = list()
+    for rule in rules:
+        if (rule[1] == page):
+            right_rules.append(rule[0])
+    return right_rules
+
+def get_left_rules(rules, page):
+    left_rules = list()
+    for rule in rules:
+        if (rule[0] == page):
+            left_rules.append(rule[1])
+    return left_rules
+
+def get_max_index(update, nums):
+    max_ind = 0
+    for n in nums:
+        ind = update.index(n)
+        if (ind > max_ind):
+            max_ind = ind
+
+def get_min_index(update, nums):
+    min_ind = len(update) - 1
+    for n in nums:
+        ind = update.index(n)
+        if (ind < min_ind):
+            min_ind = ind
+
+def fix_update(update, rules):
+    a_rules = get_applicable_rules(update, rules)
+    pages = get_relevant_pages(a_rules)
+    print(f"Fixing {update} with {a_rules}")
+    for p in pages:
+        update.remove(p)
+    for p in pages:
+        a_rules = get_applicable_rules_page(update, rules, p)
+        if (a_rules):
+            left_rules = get_left_rules(a_rules, p)
+            right_rules = get_right_rules(a_rules, p)
+            if (left_rules):
+                max_ind = get_max_index(update, left_rules)
+                update.insert(max_ind+1, p)
+            else:
+                min_ind = get_min_index(update, right_rules)
+                update.insert(min_ind, p)
+        
+    return update
+
+def fix_updates(updates, rules):
+    fixed_updates = list()
+    for update in updates:
+        fixed_updates.append(fix_update(update, rules))
+    return fixed_updates
+
 def get_sum_middle_elt(updates):
     sum_middle = 0
     for update in updates:
@@ -55,6 +149,14 @@ def get_sum_middle_elt(updates):
 def solution(input_data):
     order_rules, updates = process_input_data(input_data)
     return get_sum_middle_elt(verify_updates(updates, order_rules))
+
+def solution2(input_data):
+    order_rules, updates = process_input_data(input_data)
+    incorrect_updates = get_incorrect_updates(updates, order_rules)
+    print(incorrect_updates)
+    fixed_updates = fix_updates(incorrect_updates, order_rules)
+    print(fixed_updates)
+    return get_sum_middle_elt(fixed_updates)
     
 def read_input():
     input_data = list()
@@ -67,4 +169,4 @@ def read_input():
 
 if (__name__ == '__main__'):
     data = read_input()
-    print(solution(data))
+    print(solution2(data))
