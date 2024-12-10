@@ -61,11 +61,14 @@ def get_applicable_rules(update, rules):
             idx2 = update.index(rule[1])
             a_rules.append(rule)
         except:
-            pass
+            continue
     return a_rules
 
 def get_applicable_rules_page(update, rules, page):
-    a_rules = get_applicable_rules(update, rules)
+    update_with_page = update.copy()
+    update_with_page.append(page)
+    a_rules = get_applicable_rules(update_with_page, rules)
+    
     for rule in a_rules:
         if (rule[0] != page and rule[1] != page):
             a_rules.remove(rule)
@@ -78,13 +81,13 @@ def get_relevant_pages(rules):
         pages.add(rule[1])
     return pages
 
-def fix_update_rule(update, rule):
-    if (verify_update_rule(update, rule)):
-        return update
-    print(f"applying rule: {rule} on {update}")
-    update.remove(rule[0])
-    update.insert(update.index(rule[1]), rule[0])
-    return update
+# def fix_update_rule(update, rule):
+#     if (verify_update_rule(update, rule)):
+#         return update
+#     print(f"applying rule: {rule} on {update}")
+#     update.remove(rule[0])
+#     update.insert(update.index(rule[1]), rule[0])
+#     return update
 
 def get_right_rules(rules, page):
     right_rules = list()
@@ -106,6 +109,7 @@ def get_max_index(update, nums):
         ind = update.index(n)
         if (ind > max_ind):
             max_ind = ind
+    return max_ind
 
 def get_min_index(update, nums):
     min_ind = len(update) - 1
@@ -113,25 +117,27 @@ def get_min_index(update, nums):
         ind = update.index(n)
         if (ind < min_ind):
             min_ind = ind
+    return min_ind
 
 def fix_update(update, rules):
     a_rules = get_applicable_rules(update, rules)
-    pages = get_relevant_pages(a_rules)
-    print(f"Fixing {update} with {a_rules}")
+    # print(f"Fixing {update} with {a_rules}")
+    pages = update.copy()
+    update.clear()
     for p in pages:
-        update.remove(p)
-    for p in pages:
+        # print(f"Inserting {p} into {update}")
         a_rules = get_applicable_rules_page(update, rules, p)
-        if (a_rules):
+        if (len(a_rules) > 0):
             left_rules = get_left_rules(a_rules, p)
             right_rules = get_right_rules(a_rules, p)
-            if (left_rules):
-                max_ind = get_max_index(update, left_rules)
+            if (len(right_rules) > 0):
+                max_ind = get_max_index(update, right_rules)
                 update.insert(max_ind+1, p)
             else:
-                min_ind = get_min_index(update, right_rules)
+                min_ind = get_min_index(update, left_rules)
                 update.insert(min_ind, p)
-        
+        else:
+            update.append(p)
     return update
 
 def fix_updates(updates, rules):
@@ -153,9 +159,9 @@ def solution(input_data):
 def solution2(input_data):
     order_rules, updates = process_input_data(input_data)
     incorrect_updates = get_incorrect_updates(updates, order_rules)
-    print(incorrect_updates)
+    # print(incorrect_updates)
     fixed_updates = fix_updates(incorrect_updates, order_rules)
-    print(fixed_updates)
+    # print(fixed_updates)
     return get_sum_middle_elt(fixed_updates)
     
 def read_input():
